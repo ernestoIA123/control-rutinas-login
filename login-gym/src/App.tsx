@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "./lib/supabase";
 
 type Mode = "register" | "login";
 
@@ -19,6 +20,9 @@ function App() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [generalMessage, setGeneralMessage] = useState("");
 
+  // 🔥 NUEVO ESTADO
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const colors = {
     bg: "#0b0f0c",
     bgSoft: "#111713",
@@ -37,7 +41,38 @@ function App() {
     inputBorder: "#334136",
   };
 
-  const validateEmail = (value: string) => {
+  // 🔥 NUEVO: VERIFICAR SESIÓN AUTOMÁTICA
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session) {
+  setGeneralMessage("✅ Ya tienes sesión iniciada");
+  setIsLoggedIn(true); // 🔥 AQUÍ TAMBIÉN
+}
+
+      setCheckingSession(false);
+    };
+
+    checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+if (session) {
+  setGeneralMessage("✅ Ya tienes sesión iniciada");
+  setIsLoggedIn(true);
+} else {
+  setGeneralMessage("");
+  setIsLoggedIn(false); // 🔥 IMPORTANTE
+}
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+    const validateEmail = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!value.trim()) return "El correo es obligatorio.";
     if (!emailRegex.test(value)) return "Ingresa un correo válido.";
@@ -99,12 +134,30 @@ function App() {
 
     if (newEmailError || newPasswordError || newConfirmPasswordError) return;
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    setTimeout(() => {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
+
+      if (error) {
+        setGeneralMessage(`❌ ${error.message}`);
+        return;
+      }
+
+      if (data.user) {
+        setGeneralMessage("✅ Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta.");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error) {
+      setGeneralMessage("❌ Error al crear la cuenta.");
+    } finally {
       setLoading(false);
-      setGeneralMessage("✅ Cuenta creada correctamente (modo prueba)");
-    }, 900);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -120,12 +173,28 @@ function App() {
 
     if (newEmailError || newPasswordError) return;
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    setTimeout(() => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
+
+      if (error) {
+        setGeneralMessage(`❌ ${error.message}`);
+        return;
+      }
+
+      if (data.user) {
+  setGeneralMessage("✅ Login correcto");
+  setIsLoggedIn(true); // 🔥 AQUÍ
+}
+    } catch (error) {
+      setGeneralMessage("❌ Error al iniciar sesión");
+    } finally {
       setLoading(false);
-      setGeneralMessage("✅ Acceso correcto (modo prueba)");
-    }, 900);
+    }
   };
 
   const handleResetPassword = () => {
@@ -136,6 +205,13 @@ function App() {
 
     setGeneralMessage("✅ Enlace enviado (modo prueba)");
   };
+if (checkingSession) {
+  return null;
+}
+  if (isLoggedIn) {
+  window.location.href = "http://localhost:5176";
+  return null;
+}
 
   return (
     <div
