@@ -209,7 +209,7 @@ if (checkingSession) {
   return null;
 }
   if (isLoggedIn) {
-  window.location.href = "http://localhost:5176";
+  window.location.href = "https://control-rutinas-app.vercel.app/";
   return null;
 }
 
