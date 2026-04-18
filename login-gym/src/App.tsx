@@ -197,14 +197,37 @@ if (session) {
     }
   };
 
-  const handleResetPassword = () => {
-    if (!email.trim()) {
-      setGeneralMessage("❌ Ingresa tu correo para recuperar tu contraseña");
+  const handleResetPassword = async () => {
+  if (!email.trim()) {
+    setGeneralMessage("❌ Ingresa tu correo para recuperar tu contraseña");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setGeneralMessage("");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email.trim().toLowerCase(),
+      {
+        redirectTo: "https://control-rutinas-app.vercel.app/reset-password",
+      }
+    );
+
+    if (error) {
+      setGeneralMessage(`❌ ${error.message}`);
       return;
     }
 
-    setGeneralMessage("✅ Enlace enviado (modo prueba)");
-  };
+    setGeneralMessage(
+      "✅ Te enviamos un enlace para restablecer tu contraseña. Revisa tu correo."
+    );
+  } catch (error) {
+    setGeneralMessage("❌ Error enviando el correo de recuperación.");
+  } finally {
+    setLoading(false);
+  }
+};
 if (checkingSession) {
   return null;
 }
