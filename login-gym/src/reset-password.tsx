@@ -46,7 +46,7 @@ function ResetPassword() {
       setMessage("✅ Contraseña actualizada correctamente");
 
       setTimeout(() => {
-        window.location.href = "https://control-rutinas-login.vercel.app/";
+        window.location.href = "https://control-rutinas-login-fvwk.vercel.app/";
       }, 2000);
 
     } catch (err) {
