@@ -210,7 +210,7 @@ if (session) {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
       {
-        redirectTo: "https://control-rutinas-login.vercel.app/reset-password",
+        redirectTo: "https://control-rutinas-login-fvwk.vercel.app/reset-password",
       }
     );
 
