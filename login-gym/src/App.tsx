@@ -210,7 +210,7 @@ if (session) {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
       {
-        redirectTo: "https://control-rutinas-login-fvwk.vercel.app/reset-password",
+        redirectTo: "https://login.controlderutinas.online/reset-password",
       }
     );
 
@@ -232,7 +232,7 @@ if (checkingSession) {
   return null;
 }
   if (isLoggedIn) {
-  window.location.href = "https://control-rutinas-app.vercel.app/";
+ window.location.href = "https://app.controlderutinas.online/";
   return null;
 }
 
