@@ -288,7 +288,7 @@ if (checkingSession) {
               letterSpacing: "0.3px",
             }}
           >
-            APP GYM
+              Control de rutinas
           </h1>
 
           <p
